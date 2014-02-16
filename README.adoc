@@ -1,4 +1,4 @@
-= SBuild Adept Plugin
+= SBuild Javac Plugin
 
 This SBuild plugin provides a Java compiler
 
@@ -13,7 +13,7 @@ You need a recent version of SBuild.
 ----
 git clone https://github.com/SBuild-org/sbuild-javac.git
 cd sbuild-sbuild-plugin/org.sbuild.plugins.javac
-sbuild all
+sbuild jar
 ----
 
 You will find the built jar in the directory `org.sbuild.plugins.javac/target`.
