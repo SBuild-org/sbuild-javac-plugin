@@ -18,11 +18,13 @@ class JavacPlugin(implicit project: Project) extends Plugin[Javac] {
       val compilerClasspath: TargetRefs = javac.compilerClasspath.getOrElse(TargetRefs())
       val dependencies: TargetRefs = javac.dependsOn ~ compilerClasspath ~ javac.classpath ~~ sources
 
-      Target(s"phony:clean-${javac.targetName}").evictCache(javac.targetName) exec {
-        javac.targetDir.deleteRecursive
+      javac.cleanTargetName.map { cleanTargetName =>
+        Target(s"phony:${cleanTargetName}").evictCache(javac.compileTargetName) exec {
+          javac.targetDir.deleteRecursive
+        }
       }
-      
-      Target(s"phony:${javac.targetName}").cacheable dependsOn dependencies exec { ctx: TargetContext =>
+
+      Target(s"phony:${javac.compileTargetName}").cacheable dependsOn dependencies exec { ctx: TargetContext =>
 
         if (sources.files.isEmpty) {
           // project.monitor.warn("No sources files found.")

@@ -6,21 +6,27 @@ import java.io.File
 object Javac {
   def forName(name: String)(implicit project: Project) =
     if (name == "") Javac(
-      targetName = "compile",
+      compileTargetName = "compile",
+      cleanTargetName = Some("clean-compile"),
       classpath = "compileCp",
       targetDir = Path("target/classes"),
       srcDirs = Seq(Path("src/main/java"))
     )
-    else Javac(
-      targetName = s"${name}-compile",
-      classpath = s"${name}Cp",
-      targetDir = Path("target") / s"$name-classes",
-      srcDirs = Seq(Path("src") / name / "java")
-    )
+    else {
+      val nameUpper = name.take(1).toUpperCase() + name.drop(1)
+      Javac(
+        compileTargetName = s"compile-${name}",
+        cleanTargetName = Some(s"clean-compile-${name}"),
+        classpath = s"compile${nameUpper}Cp",
+        targetDir = Path("target") / s"${name}-classes",
+        srcDirs = Seq(Path("src") / name / "java")
+      )
+    }
 }
 
 case class Javac(
-  targetName: String,
+  compileTargetName: String,
+  cleanTargetName: Option[String],
   classpath: TargetRefs,
   targetDir: File,
   compilerClasspath: Option[TargetRefs] = None,
