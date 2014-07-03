@@ -1,11 +1,24 @@
 package org.sbuild.plugins.javac
 
-import de.tototec.sbuild._
-import de.tototec.sbuild.addons.java.{ Javac => JavacAddon }
+import org.sbuild._
 
 class JavacPlugin(implicit project: Project) extends Plugin[Javac] {
 
-  def create(name: String): Javac = Javac.forName(name)
+  def create(name: String): Javac = {
+    val compileTargetName = s"javac-${name}"
+    val cleanTargetName = s"clean-javac-${name}"
+    val classpath = TargetRefs()
+    val targetDir = Path(s"target/javac-${name}-classes")
+    val srcDirs = Seq(Path(s"src/${name}/java"))
+    
+    Javac(
+        compileTargetName = compileTargetName,
+        cleanTargetName = Some(cleanTargetName),
+        classpath = classpath,
+        targetDir = targetDir,
+        srcDirs = srcDirs
+        )
+  }
 
   def applyToProject(instances: Seq[(String, Javac)]): Unit = instances.foreach {
     case (name, javac) =>
@@ -27,12 +40,13 @@ class JavacPlugin(implicit project: Project) extends Plugin[Javac] {
       Target(s"phony:${javac.compileTargetName}").cacheable dependsOn dependencies exec { ctx: TargetContext =>
 
         if (sources.files.isEmpty) {
+          // TODO: Improve, if for a dedicated error API in SBuild
           // project.monitor.warn("No sources files found.")
           // ctx.error("No source files found.")
           throw new RuntimeException("No source files found.")
         }
 
-        val compiler = new JavacAddon(
+        val compiler = new JavacTask(
           classpath = javac.classpath.files,
           sources = sources.files,
           destDir = javac.targetDir,

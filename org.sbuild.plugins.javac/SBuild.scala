@@ -5,27 +5,46 @@ import de.tototec.sbuild.ant.tasks._
 
 @version("0.7.1")
 @classpath(
-  "mvn:org.sbuild:org.sbuild.plugins.sbuildplugin:0.2.2",
+  "mvn:org.sbuild:org.sbuild.plugins.sbuildplugin:0.3.0",
   "mvn:org.apache.ant:ant:1.8.4",
   "mvn:org.sbuild:org.sbuild.plugins.mavendeploy:0.1.0"
 )
 class SBuild(implicit _project: Project) {
 
   val namespace = "org.sbuild.plugins.javac"
-  val version = "0.0.9000"
+  val version = "0.0.9001"
   val url = "https://github.com/SBuild-org/sbuild-javac-plugin"
   val sourcesJar = s"target/${namespace}-${version}-sources.jar"
   val sourcesDir = "src/main/scala"
+  val sbuildVersion = "0.7.9010.0-8-0-M1"
 
   Target("phony:all") dependsOn "jar" ~ sourcesJar
 
   import org.sbuild.plugins.sbuildplugin._
+
+  val scalaVersion = "2.11.1"
+  val scalaBinVersion = "2.11"
+  val sbuildPluginVersion = new SBuildVersion {
+    override val version: String = sbuildVersion
+    override val sbuildClasspath: TargetRefs =
+      s"http://sbuild.org/uploads/sbuild/${sbuildVersion}/org.sbuild-${sbuildVersion}.jar"
+    override val scalaClasspath: TargetRefs =
+      s"mvn:org.scala-lang:scala-library:${scalaVersion}" ~
+        s"mvn:org.scala-lang:scala-reflect:${scalaVersion}" ~
+        s"mvn:org.scala-lang.modules:scala-xml_${scalaBinVersion}:1.0.1"
+    override val scalaCompilerClasspath: TargetRefs =
+      s"mvn:org.scala-lang:scala-library:${scalaVersion}" ~
+        s"mvn:org.scala-lang:scala-reflect:${scalaVersion}" ~
+        s"mvn:org.scala-lang:scala-compiler:${scalaVersion}"
+    override val scalaTestClasspath: TargetRefs =
+      s"mvn:org.scalatest:scalatest_${scalaBinVersion}:2.2.0"
+  }
+
   Plugin[SBuildPlugin] configure (_.copy(
-    sbuildVersion = "0.7.1",
+    sbuildVersion = sbuildPluginVersion,
     pluginClass = s"${namespace}.Javac",
     pluginVersion = version
   ))
-
 
   import org.sbuild.plugins.mavendeploy._
   Plugin[MavenDeploy] configure (_.copy(

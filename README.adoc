@@ -1,4 +1,6 @@
 = SBuild Javac Plugin
+:sbuildversion: 0.7.9010
+:pluginversion: 0.0.9001
 
 This SBuild plugin provides a Java compiler
 
